@@ -153,7 +153,7 @@ always @(posedge clk)begin
             end
             `LOAD : begin
                     address     <= registru[instruction[2:0]][A_SIZE-1:0];
-                    registru[instruction[10:8]] = data_in;
+                    registru[instruction[10:8]] <= data_in;
                     read <= 1;
                     write <=0; 
                     end 
@@ -164,7 +164,7 @@ always @(posedge clk)begin
                     end 
             `STORE : begin
                     address <= registru[instruction[10:8]][A_SIZE-1:0];
-                    data_out = registru[instruction[2:0]];
+                    data_out <= registru[instruction[2:0]];
                     read <= 0;
                     write <=1; 
                     end 
@@ -230,14 +230,6 @@ always @(posedge clk)begin
        endcase
     end
 end
- memory #(.A_SIZE(A_SIZE),.D_SIZE(D_SIZE)) mem (
- .clk(clk),
- .rst(rst),
- .read(read),
- .write(write),
- .data_input(data_out),
- .data_output(data_in),
- .address(address)
- );       
+      
         
 endmodule
