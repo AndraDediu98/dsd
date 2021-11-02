@@ -42,12 +42,10 @@ module seq_core_tb();
         instr[8]=16'b0000001000001011; //ADD R0 R1 R3
         instr[9]=16'b0000001010000111;   //ADD R2 R0 R7
         instr[10]=16'b0000011000000001; //SUB R0 R0 R1
-        //instr[11]=16'b0011000000000010; //STORE M[R0] R2
-        //instr[12]=16'b0011100000000011; //STORE M[R4] R3
+        instr[11]=16'b0011000000000010; //STORE M[R0] R2
+        instr[12]=16'b0011010000000011; //STORE M[R4] R3
         instr[13]=16'b0010000000000000; //LOAD R0 M[R0]
-       
-
-        
+           
     end
   
     initial begin
@@ -58,7 +56,7 @@ module seq_core_tb();
         rst_tb       = 1'b0;
         #1;
         rst_tb       = 1'b1;
-        #30;
+        #36;
         rst_tb       = 1'b0;
         #1;
         rst_tb       = 1'b1;

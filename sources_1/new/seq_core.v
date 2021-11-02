@@ -75,112 +75,91 @@ reg [D_SIZE-1:0] registru [0:7];
 reg halt=1;
 
 integer i;
-always@(posedge clk) begin
+
+always @(posedge clk)begin
     if(rst==0)begin
         pc<=0;
         for (i=0; i<8; i=i+1) registru[i] <= 0;
         end
-    else 
-        pc<=pc+1;
-end
-
-always @(posedge clk)begin
     if(rst==1 && halt==1)begin
         casex(instruction[15:0])
             `NOP : begin
-                    read    <= 1'b0;
-                    write   <= 1'b0;
+                    pc<=pc+1;
                     end
             `ADD : begin
-                   read <= 0;
-                   write <=0;
                    registru[instruction[8:6]] <= registru[instruction[5:3]]+registru[instruction[2:0]];
+                   pc<=pc+1;
                    end
             `ADDF :begin
                     registru[instruction[8:6]]=registru[instruction[5:3]]+registru[instruction[2:0]];
-                    read <= 0;
-                    write <=0;
+                    pc<=pc+1;
                     end
             `SUB :begin
                      registru[instruction[8:6]]=registru[instruction[5:3]]-registru[instruction[2:0]];
-                     read <= 0;
-                     write <=0;
+                     pc<=pc+1;
                      end
             `SUBF :begin
                      registru[instruction[8:6]]=registru[instruction[5:3]]-registru[instruction[2:0]];
-                     read <= 0;
-                     write <=0;
+                     pc<=pc+1;
                      end
             `AND :begin
                      registru[instruction[8:6]]=registru[instruction[5:3]] && registru[instruction[2:0]];
-                     read <= 0;
-                     write <=0;
+                     pc<=pc+1;
                      end
             `OR : begin
                      registru[instruction[8:6]]=registru[instruction[5:3]] || registru[instruction[2:0]];
-                     read <= 0;
-                     write <=0;  
+                     pc<=pc+1;
                      end        
            `XOR : begin
-                    registru[instruction[8:6]]=registru[instruction[5:3]]^ registru[instruction[2:0]];
-                    read <= 0;
-                    write <=0;            
+                    registru[instruction[8:6]]=registru[instruction[5:3]]^ registru[instruction[2:0]];            
+                    pc<=pc+1;
                     end
             `NAND : begin 
                     registru[instruction[8:6]]=!(registru[instruction[5:3]]&&registru[instruction[2:0]]);
                     read <= 0;
                     write <=0;
+                    pc<=pc+1;
                     end
             `NOR : begin
                      registru[instruction[8:6]]=!(registru[instruction[5:3]] || registru[instruction[2:0]]);//nor
-                     read <= 0;
-                     write <=0;  
+                     pc<=pc+1;
                      end         
             `NXOR : begin
-                    registru[instruction[8:6]]=!(registru[instruction[5:3]] ^ registru[instruction[2:0]]);//nxor
-                    read <= 0;
-                    write <=0; 
+                    registru[instruction[8:6]]=!(registru[instruction[5:3]] ^ registru[instruction[2:0]]);//nxo
+                    pc<=pc+1;
                     end
             `SHIFTR : begin
                     registru[instruction[8:6]]=(registru[instruction[8:6]]>>registru[instruction[5:0]]);//shiftr
-                    read <= 0;
-                    write <=0; 
+                    pc<=pc+1;
                     end
             `SHIFTRA : begin
             registru[instruction[8:6]]=(registru[instruction[8:6]]<<registru[instruction[5:0]]);//shiftl
-            read <= 0;
-            write <=0; 
+            pc<=pc+1;
             end
             `LOAD : begin
-                    address     <= registru[instruction[2:0]][A_SIZE-1:0];
-                    registru[instruction[10:8]] <= data_in;
-                    read <= 1;
-                    write <=0; 
+                    registru[instruction[10:8]] <= data_in; 
+                    pc<=pc+1;
                     end 
             `LOADC :begin
                     registru[instruction[10:8]] <= {registru[instruction[10:8]][D_SIZE-1:8],instruction[7:0]};
-                    read <= 0;
-                    write <=0; 
+                    pc<=pc+1;
                     end 
             `STORE : begin
-                    address <= registru[instruction[10:8]][A_SIZE-1:0];
-                    data_out <= registru[instruction[2:0]];
-                    read <= 0;
-                    write <=1; 
+                    //address <= registru[instruction[10:8]][A_SIZE-1:0];
+                    //data_out <= registru[instruction[2:0]];
+                    //read <= 0;
+                    //write <=1; 
+                    pc<=pc+1;
                     end 
             `JMP : begin
                     pc=registru[instruction[2:0]];
-                    read <= 0;
-                    write <=0; 
+                    pc<=pc+1;
                     end 
             `JMPR : begin
-                    pc=pc+instruction[5:0];
-                    read <= 0;
-                    write <=1; 
+                    pc=pc+instruction[5:0]; 
+                    pc<=pc+1;
                     end 
             `JMPCOND : begin
-                       read    <= 1'b0;
-                       write   <= 1'b0;
                        casex(instruction[11:9])
                 
                             `N  :   if(registru[instruction[8:6]] < 0)
@@ -198,11 +177,10 @@ always @(posedge clk)begin
                              `RSV:   ;
                                                 
                                     endcase
+                                pc<=pc+1;
                                 end
 
             `JMPRCOND : begin
-                       read    <= 1'b0;
-                       write   <= 1'b0;
                        casex(instruction[11:9])
                 
                             `N  :   if(registru[instruction[8:6]] < 0)
@@ -220,16 +198,29 @@ always @(posedge clk)begin
                              `RSV:   ;
                                                 
                                     endcase
+                                pc<=pc+1;
                                 end
             
             `HALT : begin
-                    read <= 1'b0;
-                    write <= 1'b0;
                     halt <= 1'b0;
+                    pc<=pc+1;
                     end           
        endcase
     end
 end
-      
-        
+always@(*)begin
+    casex(instruction[15:0])      
+        `LOAD : begin
+                    address<= registru[instruction[2:0]][A_SIZE-1:0];
+                    read <= 1;
+                    write <=0; 
+                     end 
+        `STORE : begin
+                    address <= registru[instruction[10:8]][A_SIZE-1:0];
+                    data_out <= registru[instruction[2:0]];
+                    read <= 0;
+                    write <=1; 
+                    end 
+         endcase
+end
 endmodule

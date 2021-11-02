@@ -30,13 +30,11 @@ input write,
 output reg [D_SIZE-1:0] data_output
     );
 reg [D_SIZE-1:0] memory [0:127];
-always@(posedge clk)begin
+always@(*)begin
         if(read & !write)
             data_output <= memory[address];
         else if(!read & write)
             memory[address] <= data_input;
 end
-  initial begin
-    memory[7]=2;
-    end
+
 endmodule
