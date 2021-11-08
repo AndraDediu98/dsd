@@ -133,9 +133,13 @@ always @(posedge clk)begin
                     pc<=pc+1;
                     end
             `SHIFTRA : begin
-            registru[instruction[8:6]]=(registru[instruction[8:6]]<<registru[instruction[5:0]]);//shiftl
-            pc<=pc+1;
-            end
+                    registru[instruction[8:6]]=(registru[instruction[8:6]]>>>registru[instruction[5:0]]);//shiftl
+                    pc<=pc+1;
+                    end
+            `SHIFTL : begin
+                    registru[instruction[8:6]]=(registru[instruction[8:6]]<<registru[instruction[5:0]]);//shiftr
+                    pc<=pc+1;
+                    end
             `LOAD : begin
                     registru[instruction[10:8]] <= data_in; 
                     pc<=pc+1;
@@ -221,6 +225,10 @@ always@(*)begin
                     read <= 0;
                     write <=1; 
                     end 
+         default: begin
+                    write <=0;
+                    read<=0;
+                    end
          endcase
 end
 endmodule
